@@ -5,6 +5,10 @@
     {
       "library": "jquery-confirm@3.3.4",
       "destination": "wwwroot/jquery-confirm/"
+    },
+    {
+      "library": "font-awesome@5.15.3",
+      "destination": "wwwroot/font-awesome/"
     }
   ]
 }

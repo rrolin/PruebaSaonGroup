@@ -4,8 +4,10 @@ using Microsoft.Extensions.Logging;
 using PruebaTecnica_Saon.Catalogs;
 using PruebaTecnica_Saon.Libraries;
 using PruebaTecnica_Saon.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace PruebaTecnica_Saon.Controllers
 {
@@ -23,6 +25,9 @@ namespace PruebaTecnica_Saon.Controllers
         // Data
         private readonly DataLibrary _data;
 
+        // Other variables
+        private readonly string _today;
+
         public HomeController(IConfiguration configuration, ILogger<HomeController> logger)
         {
             _configuration = configuration;
@@ -36,7 +41,9 @@ namespace PruebaTecnica_Saon.Controllers
             _endpointTotalReport = Endpoints.TotalReport;
             _endpointProvinces = Endpoints.Provinces;
             _endpointRegions = Endpoints.Regions;
-            
+
+            // Initialize variables
+            _today = DateTime.Today.ToString("yyyy-MM-dd");
         }
 
         #region Main actions
@@ -44,6 +51,18 @@ namespace PruebaTecnica_Saon.Controllers
         public IActionResult Index()
         {
             var regions = _data.GetAsync<RegionsModel>(endpoint: _endpointRegions).Result;
+
+            var reportTopRegions = _data
+                .GetAsync<ReportByRegionModel>(
+                    endpoint: $"{_endpointReports}?date={_today}"
+                )
+                .Result
+                .data
+                .OrderByDescending(x => x.confirmed)
+                .Take(10)
+                .ToList();
+
+            //
 
             return View();
         }
