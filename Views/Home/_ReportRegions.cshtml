@@ -1,0 +1,36 @@
+﻿@model List<PruebaTecnica_Saon.Models.RegionReport>
+
+@if (Model is not null && Model.Count > 0)
+{
+    <div class="table-responsive">
+        <table id="tblReportByRegion" class="table" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(m => m[0].region.name)</th>
+                    <th>@Html.DisplayNameFor(m => m[0].confirmed)</th>
+                    <th>@Html.DisplayNameFor(m => m[0].deaths)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.region.name</td>
+                        <td>@item.confirmed.ToString("N0")</td>
+                        <td>@item.deaths.ToString("N0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="col-12 bg-white recordNoFound">
+        <div class="form-group text-center mt-5">
+            <p>
+                Something went wrong on trying to retrieve information.
+            </p>
+        </div>
+    </div>
+}

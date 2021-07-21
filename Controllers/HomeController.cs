@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PruebaTecnica_Saon.Catalogs;
@@ -26,7 +27,7 @@ namespace PruebaTecnica_Saon.Controllers
         private readonly DataLibrary _data;
 
         // Other variables
-        private readonly string _today;
+        private readonly string _latestDate;
 
         public HomeController(IConfiguration configuration, ILogger<HomeController> logger)
         {
@@ -43,18 +44,18 @@ namespace PruebaTecnica_Saon.Controllers
             _endpointRegions = Endpoints.Regions;
 
             // Initialize variables
-            _today = DateTime.Today.ToString("yyyy-MM-dd");
+            // Date is set to a day before due information may not be available anytime on current day.
+            _latestDate = DateTime.Today.AddDays(-1).ToString("yyyy-MM-dd");
         }
 
         #region Main actions
         [HttpGet]
         public IActionResult Index()
         {
-            var regions = _data.GetAsync<RegionsModel>(endpoint: _endpointRegions).Result;
-
+            // Get top ten regions with confirmed cases
             var reportTopRegions = _data
                 .GetAsync<ReportByRegionModel>(
-                    endpoint: $"{_endpointReports}?date={_today}"
+                    endpoint: $"{_endpointReports}?date={_latestDate}"
                 )
                 .Result
                 .data
@@ -62,17 +63,66 @@ namespace PruebaTecnica_Saon.Controllers
                 .Take(10)
                 .ToList();
 
-            //
+            // Data for fill out select controls
+            ViewData["Regions"] = new SelectList(GetRegions(), "iso", "name");
 
-            return View();
+            return View(reportTopRegions);
+        }
+
+        [HttpGet]
+        public IActionResult ReportProvinces(string region)
+        {
+            // Get top ten provinces with confirmed cases
+            var reportTopProvinces = _data
+                .GetAsync<ReportByRegionModel>(
+                    endpoint: $"{_endpointReports}?date={_latestDate}&iso={region}"
+                )
+                .Result
+                .data
+                .OrderByDescending(x => x.confirmed)
+                .Take(10)
+                .ToList();
+
+            // Display alert in case of empty
+            if (reportTopProvinces is null || reportTopProvinces.Count is 0)
+            {
+                return Json(StatusCode(statusCode: 204, value: "No data was found with current search criteria."));
+            }
+
+            return PartialView("~/Views/Home/_ReportProvinces.cshtml", reportTopProvinces);
         }
 
         #endregion
 
-        public IActionResult Privacy()
+        #region UTILITIES
+        [NonAction]
+        public List<Region> GetRegions()
+        {
+            // Regions list
+            var regions = _data.GetAsync<RegionsModel>(endpoint: _endpointRegions).Result.data.OrderBy(x => x.name).ToList();
+
+            // Add default first option
+            regions.Insert(
+                index: 0,
+                item: new()
+                {
+                    iso = "",
+                    name = "Select..."
+                }
+            );
+
+            return regions;
+        }
+
+        #endregion
+
+        #region OPTIONS
+        public IActionResult About()
         {
             return View();
         }
+
+        #endregion
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

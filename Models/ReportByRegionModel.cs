@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace PruebaTecnica_Saon.Models
 {
@@ -14,7 +15,11 @@ namespace PruebaTecnica_Saon.Models
     public partial class RegionReport
     {
         public string date { get; set; }
+
+        [DisplayName("CASES")]
         public int confirmed { get; set; }
+
+        [DisplayName("DEATHS")]
         public int deaths { get; set; }
         public int recovered { get; set; }
         public int confirmed_diff { get; set; }
@@ -30,7 +35,11 @@ namespace PruebaTecnica_Saon.Models
     public partial class RegionData
     {
         public string iso { get; set; }
+
+        [DisplayName("REGION")]
         public string name { get; set; }
+
+        [DisplayName("PROVINCE")]
         public string province { get; set; }
         public decimal? lat { get; set; }
 
