@@ -1,8 +1,70 @@
-﻿@{
+﻿@model List<PruebaTecnica_Saon.Models.RegionReport>
+
+@{
     ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Scripts
+{
+    <script type="text/javascript">
+        // Setup for table styling
+        $(document).ready(function () {
+            $('#tblReportByRegion').DataTable({
+                "lengthMenu": [5, 10, 15],
+                "searching": false,
+                "paging": false,
+                "info": false,
+                "order": [[1, "desc"]]
+            });
+        });
+
+        // Retrieve report by region
+        $(document).on('click', '#btnReport', function () {
+            var selectedRegion = $('#selRegion').val();
+
+            if (selectedRegion == '') {
+                ShowAlert('Incomplete', 'Please select a valid region.', 'warning');
+                return false;
+            }
+
+            $('#divReportRegions').hide(250);
+            RefreshContent('@Url.Action("ReportProvinces", "Home")?region=' + selectedRegion, 'GET', '', '#divReportProvinces', '');
+        });
+    </script>
+}
+
+@* MARKUP *@
+
+<h6 class="font-weight-bold">
+    TOP 10 COVID CASES
+</h6>
+<hr />
+
+<div class="card border">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-3">
+                <select id="selRegion" class="form-control" asp-items="ViewBag.Regions"></select>
+            </div>
+            <div class="col-2">
+                <button id="btnReport" type="button" class="btn btn-primary btn-block">Report</button>
+            </div>
+            <div class="col-4 offset-3">
+                <div class="btn-group btn-block" role="group" aria-label="Export options">
+                    <button type="button" class="btn btn-primary">XML</button>
+                    <button type="button" class="btn btn-secondary">JSON</button>
+                    <button type="button" class="btn btn-dark">CSV</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="divReportRegions" class="col-12">
+            @await Html.PartialAsync("~/Views/Home/_ReportRegions.cshtml", Model)
+        </div>
+
+        <div id="divReportProvinces" class="col-12 display-none">
+            @await Html.PartialAsync("~/Views/Home/_ReportProvinces.cshtml", null)
+        </div>
+    </div>
 </div>
