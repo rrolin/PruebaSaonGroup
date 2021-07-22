@@ -1,4 +1,4 @@
-﻿@model List<PruebaTecnica_Saon.Models.RegionReport>
+﻿@model List<PruebaTecnica_Saon.Models.ReportModel>
 
 @{
     ViewData["Title"] = "Home";
@@ -7,16 +7,32 @@
 @section Scripts
 {
     <script type="text/javascript">
-        // Setup for table styling
+        // Scripts to execute on screen ready
         $(document).ready(function () {
-            $('#tblReportByRegion').DataTable({
-                "lengthMenu": [5, 10, 15],
+            ShowLoader(200);
+            TableSetup();
+        });
+
+        // Scripts to execute on ajax complete
+        $(document).ajaxComplete(function () {
+            HideLoader(10);
+            TableSetup();
+        });
+
+        // Scripts to execute on ajax starts
+        $(document).ajaxStart(function () {
+            ShowLoader(0);
+        });
+
+        // Setup for table styling
+        function TableSetup() {
+            $('#tblReport').DataTable({
                 "searching": false,
                 "paging": false,
                 "info": false,
                 "order": [[1, "desc"]]
             });
-        });
+        }
 
         // Retrieve report by region
         $(document).on('click', '#btnReport', function () {
@@ -27,8 +43,22 @@
                 return false;
             }
 
-            $('#divReportRegions').hide(250);
-            RefreshContent('@Url.Action("ReportProvinces", "Home")?region=' + selectedRegion, 'GET', '', '#divReportProvinces', '');
+            RefreshContent('@Url.Action("ReportProvinces", "Home")?region=' + selectedRegion, 'GET', '', '#divReportTable', '');
+        });
+
+        // Export as CSV
+        $(document).on('click', '#btnExportCsv', function () {
+            ExportToCsv('divReportTable', 'CovidReport');
+        });
+
+        // Export as JSON
+        $(document).on('click', '#btnExportJson', function () {
+            ExportToJson('divReportTable', 'CovidReport');
+        });
+
+        // Export as XML
+        $(document).on('click', '#btnExportXml', function () {
+            ExportToXml('divReportTable', 'CovidReport');
         });
     </script>
 }
@@ -43,28 +73,28 @@
 <div class="card border">
     <div class="card-header">
         <div class="row">
-            <div class="col-3">
+            <div class="col-6 col-md-4 col-lg-3">
                 <select id="selRegion" class="form-control" asp-items="ViewBag.Regions"></select>
             </div>
-            <div class="col-2">
+            <div class="col-6 col-md-3 col-lg-2">
                 <button id="btnReport" type="button" class="btn btn-primary btn-block">Report</button>
             </div>
-            <div class="col-4 offset-3">
+            <div class="col-12 col-md-5 col-lg-4 offset-lg-3 mt-3 mt-md-0">
                 <div class="btn-group btn-block" role="group" aria-label="Export options">
-                    <button type="button" class="btn btn-primary">XML</button>
-                    <button type="button" class="btn btn-secondary">JSON</button>
-                    <button type="button" class="btn btn-dark">CSV</button>
+                    <a id="btnExportXml" class="btn btn-primary" href="#">XML</a>
+                    <a id="btnExportJson" class="btn btn-secondary" href="#">JSON</a>
+                    <a id="btnExportCsv" class="btn btn-dark" href="#">CSV</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="card-body">
-        <div id="divReportRegions" class="col-12">
-            @await Html.PartialAsync("~/Views/Home/_ReportRegions.cshtml", Model)
+    <div class="card-body px-0 px-md-2">
+        <div id="divReportTable" class="col-12">
+            @await Html.PartialAsync("~/Views/Home/_ReportTable.cshtml", Model)
         </div>
 
-        <div id="divReportProvinces" class="col-12 display-none">
+        @*<div id="divReportProvinces" class="col-12 display-none">
             @await Html.PartialAsync("~/Views/Home/_ReportProvinces.cshtml", null)
-        </div>
+        </div>*@
     </div>
 </div>

@@ -1,13 +1,13 @@
-﻿@model List<PruebaTecnica_Saon.Models.RegionReport>
+﻿@model List<PruebaTecnica_Saon.Models.ReportModel>
 
 @if (Model is not null && Model.Count > 0)
 {
     <div class="table-responsive">
-        <table id="tblReportByRegion" class="table" width="100%" cellspacing="0">
+        <table id="tblReport" class="table" width="100%" cellspacing="0">
             <thead>
                 <tr>
-                    <th>@Html.DisplayNameFor(m => m[0].region.province)</th>
-                    <th>@Html.DisplayNameFor(m => m[0].confirmed)</th>
+                    <th>@(Model[0].locationHeader)</th>
+                    <th>@Html.DisplayNameFor(m => m[0].cases)</th>
                     <th>@Html.DisplayNameFor(m => m[0].deaths)</th>
                 </tr>
             </thead>
@@ -15,8 +15,8 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.region.province</td>
-                        <td>@item.confirmed.ToString("N0")</td>
+                        <td>@item.location</td>
+                        <td>@item.cases.ToString("N0")</td>
                         <td>@item.deaths.ToString("N0")</td>
                     </tr>
                 }
