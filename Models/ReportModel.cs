@@ -14,10 +14,5 @@ namespace PruebaTecnica_Saon.Models
 
         [DisplayName("DEATHS")]
         public int deaths { get; set; }
-
-
-        // Explicit conversion
-
-        
     }
 }
