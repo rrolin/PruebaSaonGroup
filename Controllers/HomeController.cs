@@ -19,8 +19,8 @@ namespace PruebaTecnica_Saon.Controllers
 
         // Endpoints
         private readonly string _endpointReports;
-        private readonly string _endpointTotalReport;
-        private readonly string _endpointProvinces;
+        //private readonly string _endpointTotalReport;
+        //private readonly string _endpointProvinces;
         private readonly string _endpointRegions;
 
         // Data
@@ -39,8 +39,8 @@ namespace PruebaTecnica_Saon.Controllers
 
             // Initialize endpoints
             _endpointReports = Endpoints.Reports;
-            _endpointTotalReport = Endpoints.TotalReport;
-            _endpointProvinces = Endpoints.Provinces;
+            //_endpointTotalReport = Endpoints.TotalReport;
+            //_endpointProvinces = Endpoints.Provinces;
             _endpointRegions = Endpoints.Regions;
 
             // Initialize variables
@@ -63,10 +63,21 @@ namespace PruebaTecnica_Saon.Controllers
                 .Take(10)
                 .ToList();
 
+            // Convert to ModelView type model
+            List<ReportModel> reportModel = reportTopRegions
+                .Select(x => new ReportModel() 
+                { 
+                    locationHeader = "REGION", 
+                    location = x.region.name,
+                    cases = x.confirmed,
+                    deaths = x.deaths
+                })
+                .ToList();
+
             // Data for fill out select controls
             ViewData["Regions"] = new SelectList(GetRegions(), "iso", "name");
 
-            return View(reportTopRegions);
+            return View(reportModel);
         }
 
         [HttpGet]
@@ -89,7 +100,18 @@ namespace PruebaTecnica_Saon.Controllers
                 return Json(StatusCode(statusCode: 204, value: "No data was found with current search criteria."));
             }
 
-            return PartialView("~/Views/Home/_ReportProvinces.cshtml", reportTopProvinces);
+            // Convert to ModelView type model
+            List<ReportModel> reportModel = reportTopProvinces
+                .Select(x => new ReportModel()
+                {
+                    locationHeader = "PROVINCE",
+                    location = x.region.province,
+                    cases = x.confirmed,
+                    deaths = x.deaths
+                })
+                .ToList();
+
+            return PartialView("~/Views/Home/_ReportTable.cshtml", reportModel);
         }
 
         #endregion
@@ -117,6 +139,7 @@ namespace PruebaTecnica_Saon.Controllers
         #endregion
 
         #region OPTIONS
+        [HttpGet]
         public IActionResult About()
         {
             return View();
